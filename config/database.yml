@@ -11,14 +11,14 @@ default: &default
   username: root
   password: 
   host: localhost
-  port: 8080
+  port: 3306
 
 
   timeout: 5000
 
 development:
   <<: *default
-  database: CommuniChat_development
+  database: CommuniChat
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -29,4 +29,4 @@ test:
 
 production:
   <<: *default
-  database: CommuniChat
+  database: CommuniChat_production
