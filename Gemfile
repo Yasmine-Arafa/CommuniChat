@@ -28,6 +28,14 @@ gem "jbuilder"
 
 gem "mysql2"
 
+gem "sidekiq"
+
+gem "sidekiq-scheduler"
+
+gem 'faker'
+
+
+
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
 
