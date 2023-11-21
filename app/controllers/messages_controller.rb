@@ -4,15 +4,42 @@ class MessagesController < ApplicationController
 
     
     def create
+        @application = Application.find_by(token: params[:application_token])
 
-        MessageCreationJob.perform_later(
+        unless @application
+            Rails.logger.error "Application not found for token: #{params[:application_token]}"
+            render json: { error: 'Application not found' }, status: :not_found
+            return
+        end
+
+        @chat = Chat.find_by(number: params[:chat_number], application_id: @application.id)
+
+        unless @chat
+            Rails.logger.error "Chat not found for number: #{params[:chat_number]}"
+            render json: { error: 'Chat not found' }, status: :not_found
+            return
+        end
+
+        message_number = @chat.messages.maximum(:number).to_i + 1  # ( optimistically ) fetchs the max field num. and increment by 1
+
+        job = MessageCreationJob.perform_later(
             params[:application_token],
             params[:chat_number],
+            message_number,
             message_params
             )
-        render json: { message: 'Message creation in progress' }, status: :accepted
+
+        queue_id = job.provider_job_id
+
+        render json: {
+            message: 'Message creation in progress',
+            message_number: message_number,
+            queue_id: queue_id  
+        }, 
+        status: :ok
 
     end
+
 
     def index
         @application = Application.find_by(token: params[:application_token])

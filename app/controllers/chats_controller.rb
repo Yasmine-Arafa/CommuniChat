@@ -4,9 +4,27 @@ class ChatsController < ApplicationController
 
 
     def create
-        
-        ChatCreationJob.perform_later(params[:application_token])
-        render json: { message: 'Chat creation in progress' }, status: :accepted
+
+        @application = Application.find_by(token: params[:application_token])
+
+        unless @application
+            Rails.logger.error "Application not found for token: #{params[:application_token]}"
+            render json: { error: 'Application not found' }, status: :not_found
+            return
+        end
+
+        number = @application.chats.maximum(:number).to_i + 1  # ( optimistically ) fetchs the max field num. and increment by 1
+
+        job = ChatCreationJob.perform_later(params[:application_token], number)
+
+        queue_id = job.provider_job_id
+
+        render json: {
+                        message: 'Chat creation in progress',
+                        chat_number: number,
+                        queue_id: queue_id  
+                    }, 
+                    status: :ok
       
     end
       
