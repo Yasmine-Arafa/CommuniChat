@@ -2,6 +2,10 @@ class Message < ApplicationRecord
     include Elasticsearch::Model    #  allowing the model to be indexed and queried using Elasticsearch
     include Elasticsearch::Model::Callbacks  # (hook) automatically update the index when a model is saved, updated or destroyed
 
+    validates :number, uniqueness: { scope: :chat_id }
+
+    belongs_to :chat, foreign_key: 'chat_id'
+
     index_name 'messages'
 
     # Define the settings and mappings for the Elasticsearch index
@@ -17,14 +21,5 @@ class Message < ApplicationRecord
         as_json(only: [:body])  #  fields to index
     end
 
-  
-    belongs_to :chat, foreign_key: 'chat_id'
 
-    before_create :assign_number
-
-    private
-
-    def assign_number
-        self.number = Chat.find(self.chat_id).messages.maximum(:number).to_i + 1
-    end
 end
