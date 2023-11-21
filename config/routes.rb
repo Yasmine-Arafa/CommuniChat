@@ -14,4 +14,32 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  resources :applications, param: :token, only: [] do    # use :token to identify applications
+
+    post '/', on: :collection, to: 'applications#create' # create a new application
+    get '/', on: :collection, to: 'applications#index' # read all applications
+    get '/:token', on: :collection, to: 'applications#show' # read a specific application
+    post '/:token', on: :collection, to: 'applications#update' # update a specific application (name)
+
+
+    resources :chats, param: :number, only: [] do
+      post '/', on: :collection, to: 'chats#create'   # create new chat   /applications/:application_token/chats
+      get '/', on: :collection, to: 'chats#index'     # get all chats within app   /applications/:application_token/chats
+      get '/:number', on: :collection, to: 'chats#show' # gat specific chat within app  /applications/:application_token/chats/:chat_number 
+
+      resources :messages, only: [] do
+        get '/search', on: :collection, to: 'messages#search' # GET /applications/:application_token/chats/:chat_number/messages/search?query=hello
+        post '/', on: :collection, to: 'messages#create' # POST /applications/:application_token/chats/:chat_number/messages
+        get '/', on: :collection, to: 'messages#index' # GET /applications/:application_token/chats/:chat_number/messages
+        get '/:number', on: :collection, to: 'messages#show' # GET /applications/:application_token/chats/:chat_number/messages/:message_number
+      end
+
+    end
+  
+  end
+
+  ## search  ###
+
+
 end

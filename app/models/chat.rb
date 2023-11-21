@@ -6,9 +6,7 @@ class Chat < ApplicationRecord
 
     private
 
-    def assign_number
-      # self.number = application.chats.maximum(:number).to_i + 1  # fetchs the max field num. and increment by 1
-      
-      self.number = Application.find(self.application_id).chats.maximum(:number).to_i + 1
+    def assign_number      
+      self.number = Application.find(self.application_id).chats.maximum(:number).to_i + 1    # fetchs the max field num. and increment by 1
     end
 end

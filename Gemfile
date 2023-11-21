@@ -34,6 +34,9 @@ gem "sidekiq-scheduler"
 
 gem 'faker'
 
+gem 'elasticsearch-rails'
+gem 'elasticsearch-model'
+
 
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
