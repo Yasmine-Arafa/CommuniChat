@@ -4,30 +4,14 @@ class MessagesController < ApplicationController
 
     
     def create
-        @application = Application.find_by(token: params[:application_token])
 
-        unless @application
-          render json: { error: 'Application not found' }, status: :not_found
-          return
-        end
+        MessageCreationJob.perform_later(
+            params[:application_token],
+            params[:chat_number],
+            message_params
+            )
+        render json: { message: 'Message creation in progress' }, status: :accepted
 
-        @chat = Chat.find_by(number: params[:chat_number], application_id: @application.id)
-
-        # return render json: { chat_id: @chat.id }, status: :ok
-
-        unless @chat
-            render json: { error: 'Chat not found' }, status: :not_found
-            return
-        end
-      
-        @message = @chat.messages.new(message_params)       # passes message body
-
-        
-        if @message.save
-            render json: { message_number: @message.number }, status: :created
-        else
-            render json: @message.errors, status: :unprocessable_entity
-        end
     end
 
     def index

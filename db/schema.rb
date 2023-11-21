@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_11_18_223246) do
+ActiveRecord::Schema[7.1].define(version: 2023_11_21_162506) do
   create_table "applications", charset: "utf8", force: :cascade do |t|
     t.string "name"
     t.string "token"
     t.integer "chats_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "lock_version"
   end
 
   create_table "chats", charset: "utf8", force: :cascade do |t|

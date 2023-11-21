@@ -38,18 +38,37 @@ class ApplicationsController < ApplicationController
     
     def update
         @application = Application.find_by(token: params[:token])
-
+        
         unless @application
             render json: { error: 'Application not found' }, status: :not_found
             return
         end
+        
+        
+        retries = 0
+    
+        begin
+            if @application.update!(application_params)
+                render json: @application.as_json(except: :id), status: :ok
+            else
+                render json: @application.errors, status: :unprocessable_entity
+            end
+        rescue ActiveRecord::StaleObjectError
+            
+          if retries < 3
 
-        if @application.update(application_params)
-            render json: @application.as_json(except: :id), status: :ok
-        else
-            render json: @application.errors, status: :unprocessable_entity
+            retries += 1
+            @application.reload
+            retry
+
+          else
+            render json: { error: 'Record has been updated by another user. Please refresh and try again.' }, status: :conflict            
+          end
+
         end
+
     end
+
     
     private
     
