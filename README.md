@@ -5,9 +5,9 @@ CommuniChat is a chat system, used to create new application which contains mult
 How to setup:
 
 ```bash
-git clone [https://github.com/Yasmine-Arafa/CommuniChat]
+git clone https://github.com/Yasmine-Arafa/CommuniChat
 
-cd [CommuniChat]
+cd CommuniChat
 
 docker-compose build
 
