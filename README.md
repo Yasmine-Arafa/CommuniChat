@@ -1,14 +1,20 @@
-# README
+# CommuniChat README
 
-CommuniChat is a chat system, used to create new application which contains multiple chats and messages
+CommuniChat is a chat system that allows the creation of applications containing multiple chats and messages.
 
-How to setup:
+## How to Set Up
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/Yasmine-Arafa/CommuniChat
 
 cd CommuniChat
+```
 
+build the project
+
+```bash
 docker-compose build
 
 docker-compose up -d
