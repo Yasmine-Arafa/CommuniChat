@@ -1,51 +1,72 @@
-# version: '3'
-# services:
-#   db:
-#     image: mysql:5.7
-#     volumes:
-#       - ./tmp/db:/var/lib/mysql
-#     environment:
-#       MYSQL_ROOT_PASSWORD: mypassword
-#       MYSQL_DATABASE: myapp_development
-#       MYSQL_USER: user
-#       MYSQL_PASSWORD: password
-#   web:
-#     build: .
-#     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
-#     volumes:
-#       - .:/communiChat
-#     ports:
-#       - "3000:3000"
-#     depends_on:
-#       - db
+version: '3'
+services:
+
+  # Rails application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - elasticsearch
+      - redis
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: mysql2://root:root@db:3306/CommuniChat
+      ELASTICSEARCH_URL: http://localhost:9200/ # Use your existing Elasticsearch configuration here
+      REDIS_URL: redis://localhost:6379/0 # Use your existing Redis configuration here
 
 
+  # MySQL database
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: CommuniChat
+    ports:
+      - "3306:3306"
+    volumes:
+      - /var/run/mysqld:/var/run/mysqld # Mount the directory for the socket file
+      - ./mysql-init:/docker-entrypoint-initdb.d'
 
-# services:
-#   db:
-#     image: mysql:5.7 # Feel free to choose the version you need
-#     volumes:
-#       - mysql_data:/var/lib/mysql
-#     environment:
-#       MYSQL_ROOT_PASSWORD: password
-#       MYSQL_DATABASE: myapp_development
-#       MYSQL_USER: user
-#       MYSQL_PASSWORD: password
-#     ports:
-#       - "3306:3306"
-#   web:
-#     build: .
-#     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
-#     volumes:
-#       - .:/myapp
-#       - bundle_data:/usr/local/bundle
-#     ports:
-#       - "3000:3000"
-#     depends_on:
-#       - db
-#     environment:
-#       DATABASE_URL: "mysql2://user:password@db/myapp_development"
 
-# volumes:
-#   mysql_data:
-#   bundle_data:
+  # Redis
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    environment:
+      xpack.security.enabled: false
+      xpack.security.enrollment.enabled: false
+      xpack.security.http.ssl.enabled: false
+      xpack.security.transport.ssl.enabled: false
+      discovery.type: single-node
+      bootstrap.memory_lock: false
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ports:
+      - "9200:9200"
+
+  
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+    volumes:
+      - .:/app
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - REDIS_URL=redis://redis:6379/0
+
+
+volumes:
+  mysql-data:
+  elasticsearch-data:

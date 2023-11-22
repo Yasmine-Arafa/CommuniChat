@@ -1,24 +1,26 @@
-# Use an official Ruby image as a base
 FROM ruby:3.2.2
 
-# Install dependencies required for Rails
-RUN apt-get update -qq && apt-get install -y nodejs postgresql-client
+# Set environment variables
+ENV RAILS_ENV=development \
+    RAILS_ROOT=/app
+
 
 # Set the working directory inside the container
-WORKDIR /communiChat
+WORKDIR $RAILS_ROOT
 
-# Copy the Gemfile and Gemfile.lock into the container
-COPY Gemfile /communiChat/Gemfile
-COPY Gemfile.lock /communiChat/Gemfile.lock
+# Install system dependencies
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
 
-# Install any needed gems
+# Install bundler and gems
+RUN gem install bundler
+COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
-# Copy the rest of your app's code into the container
-COPY . /communiChat
+# Copy the Rails application into the container
+COPY . .
 
-# Expose the port your app runs on
+# Expose port 3000 (the default Rails port)
 EXPOSE 3000
 
-# Configure the main process to run when running the image
-CMD ["rails", "server", "-b", "0.0.0.0"]
+# Start the Rails application
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]

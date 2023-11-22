@@ -1,6 +1,7 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  
   # Settings specified here will take precedence over those in config/application.rb.
 
   # In the development environment your application's code is reloaded any time
@@ -16,6 +17,8 @@ Rails.application.configure do
 
   # Enable server timing
   config.server_timing = true
+
+  config.web_console.permissions = '172.18.0.0/16'
 
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.
